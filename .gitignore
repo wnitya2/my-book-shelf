@@ -31,3 +31,6 @@ npm-debug.log*
 *.json.key
 credentials.json
 token.json
+
+# Planning
+planning/
