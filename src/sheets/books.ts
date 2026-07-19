@@ -6,27 +6,38 @@ export interface Book {
   id: string;
   title: string;
   author: string;
+  cover_url: string;
   current_page: number;
   total_pages: number;
   status: BookStatus;
+  rating: number | null;
   created_at: string;
   updated_at: string;
 }
 
-const COLUMNS = ["id", "title", "author", "current_page", "total_pages", "status", "created_at", "updated_at"];
-const RANGE = `${SHEET_NAME}!A2:H`;
+const RANGE = `${SHEET_NAME}!A2:J`;
 
 function rowToBook(row: string[]): Book {
   return {
     id: row[0],
     title: row[1],
     author: row[2],
-    current_page: Number(row[3]),
-    total_pages: Number(row[4]),
-    status: row[5] as BookStatus,
-    created_at: row[6],
-    updated_at: row[7],
+    cover_url: row[3] ?? "",
+    current_page: Number(row[4]),
+    total_pages: Number(row[5]),
+    status: row[6] as BookStatus,
+    rating: row[7] ? Number(row[7]) : null,
+    created_at: row[8],
+    updated_at: row[9],
   };
+}
+
+function bookToRow(book: Book): (string | number | null)[] {
+  return [
+    book.id, book.title, book.author, book.cover_url,
+    book.current_page, book.total_pages, book.status,
+    book.rating, book.created_at, book.updated_at,
+  ];
 }
 
 export async function getAllBooks(): Promise<Book[]> {
@@ -40,16 +51,16 @@ export async function getAllBooks(): Promise<Book[]> {
 export async function appendBook(data: Omit<Book, "id" | "created_at" | "updated_at">): Promise<Book> {
   const now = new Date().toISOString();
   const id = crypto.randomUUID();
-  const row = [id, data.title, data.author, data.current_page, data.total_pages, data.status, now, now];
+  const book: Book = { id, ...data, created_at: now, updated_at: now };
 
   await sheets.spreadsheets.values.append({
     spreadsheetId: SPREADSHEET_ID,
     range: `${SHEET_NAME}!A1`,
     valueInputOption: "RAW",
-    requestBody: { values: [row] },
+    requestBody: { values: [bookToRow(book)] },
   });
 
-  return rowToBook(row.map(String));
+  return book;
 }
 
 async function findRowIndex(id: string): Promise<number> {
@@ -59,7 +70,7 @@ async function findRowIndex(id: string): Promise<number> {
   });
   const rows = res.data.values ?? [];
   const idx = rows.findIndex((r) => r[0] === id);
-  return idx === -1 ? -1 : idx + 2; // 1-indexed, offset by header row
+  return idx === -1 ? -1 : idx + 2;
 }
 
 export async function updateBook(id: string, updates: Partial<Omit<Book, "id" | "created_at">>): Promise<Book | null> {
@@ -68,21 +79,18 @@ export async function updateBook(id: string, updates: Partial<Omit<Book, "id" | 
 
   const res = await sheets.spreadsheets.values.get({
     spreadsheetId: SPREADSHEET_ID,
-    range: `${SHEET_NAME}!A${rowIndex}:H${rowIndex}`,
+    range: `${SHEET_NAME}!A${rowIndex}:J${rowIndex}`,
   });
   const existing = res.data.values?.[0];
   if (!existing) return null;
 
-  const updated = rowToBook(existing);
-  Object.assign(updated, updates, { updated_at: new Date().toISOString() });
+  const updated: Book = { ...rowToBook(existing), ...updates, updated_at: new Date().toISOString() };
 
   await sheets.spreadsheets.values.update({
     spreadsheetId: SPREADSHEET_ID,
-    range: `${SHEET_NAME}!A${rowIndex}:H${rowIndex}`,
+    range: `${SHEET_NAME}!A${rowIndex}:J${rowIndex}`,
     valueInputOption: "RAW",
-    requestBody: {
-      values: [[updated.id, updated.title, updated.author, updated.current_page, updated.total_pages, updated.status, updated.created_at, updated.updated_at]],
-    },
+    requestBody: { values: [bookToRow(updated)] },
   });
 
   return updated;
@@ -101,12 +109,7 @@ export async function deleteBook(id: string): Promise<boolean> {
     requestBody: {
       requests: [{
         deleteDimension: {
-          range: {
-            sheetId,
-            dimension: "ROWS",
-            startIndex: rowIndex - 1,
-            endIndex: rowIndex,
-          },
+          range: { sheetId, dimension: "ROWS", startIndex: rowIndex - 1, endIndex: rowIndex },
         },
       }],
     },
