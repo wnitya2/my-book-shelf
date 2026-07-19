@@ -23,10 +23,13 @@ Buat struktur folder seperti berikut:
 src/
   index.ts        # entry point, setup Elysia app
   sheets/
-    client.ts     # inisialisasi Google Sheets API client
+    client.ts     # inisialisasi Google Sheets API client (OAuth2)
     books.ts      # fungsi baca/tulis data buku ke Sheet
   routes/
     books.ts      # route untuk CRUD buku
+    auth.ts       # route untuk OAuth2 callback
+scripts/
+  get-token.ts    # one-time script untuk mendapatkan refresh token
 ```
 
 ### 3. Google Sheet Structure
@@ -36,12 +39,22 @@ Gunakan spreadsheet yang sudah ada. Buat sheet bernama `books` dengan kolom:
 Data diakses berdasarkan baris (row), bukan SQL query.
 
 ### 4. Google Sheets Authentication
-- Gunakan Google Service Account untuk autentikasi
-- Simpan credentials di `.env` (jangan di-commit)
-- Buat file `.env.example` sebagai template dengan variabel:
-  - `GOOGLE_SPREADSHEET_ID`
-  - `GOOGLE_SERVICE_ACCOUNT_EMAIL`
-  - `GOOGLE_PRIVATE_KEY`
+Gunakan OAuth 2.0 (Web application) — autentikasi sebagai pemilik spreadsheet.
+
+Flow satu kali (one-time setup):
+1. Jalankan `bun run scripts/get-token.ts`
+2. Buka URL yang muncul di browser, login dengan akun Google pemilik spreadsheet
+3. Google redirect ke `/auth/callback`, app simpan refresh token ke console
+4. Copy refresh token ke `.env`
+
+Setelah itu app bisa jalan tanpa perlu login lagi.
+
+Buat file `.env.example` dengan variabel:
+- `GOOGLE_SPREADSHEET_ID`
+- `GOOGLE_CLIENT_ID`
+- `GOOGLE_CLIENT_SECRET`
+- `GOOGLE_REDIRECT_URI` (contoh: `http://localhost:3000/auth/callback`)
+- `GOOGLE_REFRESH_TOKEN` (diisi setelah one-time setup)
 
 ### 5. API Routes
 Buat endpoint dasar untuk resource `books`:
@@ -50,6 +63,10 @@ Buat endpoint dasar untuk resource `books`:
 - `PATCH /books/:id` — update progress/data buku (update baris berdasarkan id)
 - `DELETE /books/:id` — hapus buku (hapus baris berdasarkan id)
 
+Tambah route untuk OAuth callback:
+- `GET /auth/callback` — terima code dari Google, tukar dengan refresh token
+
 ### 6. Run
 - App bisa dijalankan dengan `bun run dev`
+- One-time setup token: `bun run scripts/get-token.ts`
 - Tidak ada migrasi database; struktur kolom disetup manual di Google Sheet
