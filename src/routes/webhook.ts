@@ -1,4 +1,5 @@
-import { Elysia, t } from "elysia";
+import { Elysia } from "elysia";
+import { handleIncomingMessage } from "../whatsapp/handler";
 
 export const webhookRoute = new Elysia({ prefix: "/webhook" })
   .get("/", ({ query }) => {
@@ -12,7 +13,7 @@ export const webhookRoute = new Elysia({ prefix: "/webhook" })
 
     return new Response("Forbidden", { status: 403 });
   })
-  .post("/", ({ body }) => {
-    console.log("Incoming webhook:", JSON.stringify(body, null, 2));
+  .post("/", async ({ body }) => {
+    handleIncomingMessage(body).catch((err) => console.error("[webhook] handler error:", err));
     return { status: "ok" };
   });

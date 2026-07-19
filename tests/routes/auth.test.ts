@@ -8,13 +8,24 @@ mock.module("googleapis", () => ({
   google: {
     auth: {
       OAuth2: class {
+        setCredentials() {}
         generateAuthUrl() {
           return "https://accounts.google.com/o/oauth2/auth?mock=true";
         }
         getToken = mockGetToken;
       },
     },
-    sheets: () => ({}),
+    sheets: () => ({
+      spreadsheets: {
+        values: {
+          get: mock(() => Promise.resolve({ data: { values: [] } })),
+          append: mock(() => Promise.resolve({})),
+          update: mock(() => Promise.resolve({})),
+        },
+        get: mock(() => Promise.resolve({ data: { sheets: [] } })),
+        batchUpdate: mock(() => Promise.resolve({})),
+      },
+    }),
   },
 }));
 

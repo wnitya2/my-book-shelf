@@ -1,6 +1,40 @@
-import { describe, it, expect, beforeAll } from "bun:test";
+import { describe, it, expect, mock, beforeAll } from "bun:test";
 import { Elysia } from "elysia";
-import { webhookRoute } from "../../src/routes/webhook";
+
+mock.module("googleapis", () => ({
+  google: {
+    auth: {
+      OAuth2: class {
+        setCredentials() {}
+        generateAuthUrl() { return "https://accounts.google.com/mock"; }
+        getToken = mock(() => Promise.resolve({ tokens: {} }));
+      },
+    },
+    sheets: mock(() => ({
+      spreadsheets: {
+        values: {
+          get: mock(() => Promise.resolve({ data: { values: [] } })),
+          append: mock(() => Promise.resolve({})),
+          update: mock(() => Promise.resolve({})),
+        },
+        get: mock(() => Promise.resolve({ data: { sheets: [] } })),
+        batchUpdate: mock(() => Promise.resolve({})),
+      },
+    })),
+  },
+}));
+
+mock.module("@anthropic-ai/sdk", () => ({
+  default: function Anthropic() {
+    this.messages = { create: mock(() => Promise.resolve({ content: [{ type: "text", text: '{"action":"unknown"}' }] })) };
+  },
+}));
+
+mock.module("../../src/whatsapp/client", () => ({
+  sendMessage: mock(() => Promise.resolve()),
+}));
+
+const { webhookRoute } = await import("../../src/routes/webhook");
 
 const VERIFY_TOKEN = "test-verify-token";
 
