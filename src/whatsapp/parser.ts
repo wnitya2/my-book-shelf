@@ -80,8 +80,10 @@ export async function parseMessage(text: string, client?: Anthropic): Promise<Pa
   const content = message?.content[0];
   if (content.type !== "text") return { action: "unknown" };
 
+  const raw = content.text.replace(/^```(?:json)?\s*/i, "").replace(/\s*```$/, "").trim();
+
   try {
-    return JSON.parse(content.text) as ParsedIntent;
+    return JSON.parse(raw) as ParsedIntent;
   } catch {
     return { action: "unknown" };
   }

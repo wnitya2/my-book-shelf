@@ -14,6 +14,6 @@ export const webhookRoute = new Elysia({ prefix: "/webhook" })
     return new Response("Forbidden", { status: 403 });
   })
   .post("/", async ({ body }) => {
-    handleIncomingMessage(body).catch(console.error);
+    handleIncomingMessage(body).catch((err) => console.error("[webhook] handler error:", err));
     return { status: "ok" };
   });

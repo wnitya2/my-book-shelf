@@ -6,13 +6,13 @@ export interface Book {
   id: string;
   title: string;
   author: string;
-  cover_url: string;
   current_page: number;
   total_pages: number;
   status: BookStatus;
-  rating: number | null;
   created_at: string;
-  updated_at: string;
+  last_read: string | null;
+  cover_url: string;
+  rating: number | null;
 }
 
 const RANGE = `${SHEET_NAME}!A2:J`;
@@ -22,21 +22,22 @@ function rowToBook(row: string[]): Book {
     id: row[0],
     title: row[1],
     author: row[2],
-    cover_url: row[3] ?? "",
-    current_page: Number(row[4]),
-    total_pages: Number(row[5]),
-    status: row[6] as BookStatus,
-    rating: row[7] ? Number(row[7]) : null,
-    created_at: row[8],
-    updated_at: row[9],
+    current_page: Number(row[3]),
+    total_pages: Number(row[4]),
+    status: row[5] as BookStatus,
+    created_at: row[6],
+    last_read: row[7] || null,
+    cover_url: row[8] ?? "",
+    rating: row[9] ? Number(row[9]) : null,
   };
 }
 
 function bookToRow(book: Book): (string | number | null)[] {
   return [
-    book.id, book.title, book.author, book.cover_url,
+    book.id, book.title, book.author,
     book.current_page, book.total_pages, book.status,
-    book.rating, book.created_at, book.updated_at,
+    book.created_at, book.last_read,
+    book.cover_url, book.rating,
   ];
 }
 
@@ -48,10 +49,10 @@ export async function getAllBooks(): Promise<Book[]> {
   return (res.data.values ?? []).filter((r) => r[0]).map(rowToBook);
 }
 
-export async function appendBook(data: Omit<Book, "id" | "created_at" | "updated_at">): Promise<Book> {
+export async function appendBook(data: Omit<Book, "id" | "created_at" | "last_read">): Promise<Book> {
   const now = new Date().toISOString();
   const id = crypto.randomUUID();
-  const book: Book = { id, ...data, created_at: now, updated_at: now };
+  const book: Book = { id, ...data, created_at: now, last_read: null };
 
   await sheets.spreadsheets.values.append({
     spreadsheetId: SPREADSHEET_ID,
@@ -84,7 +85,7 @@ export async function updateBook(id: string, updates: Partial<Omit<Book, "id" | 
   const existing = res.data.values?.[0];
   if (!existing) return null;
 
-  const updated: Book = { ...rowToBook(existing), ...updates, updated_at: new Date().toISOString() };
+  const updated: Book = { ...rowToBook(existing), ...updates };
 
   await sheets.spreadsheets.values.update({
     spreadsheetId: SPREADSHEET_ID,

@@ -54,7 +54,7 @@ describe("handleIncomingMessage", () => {
 
   it("update_progress: updates book and appends reading log", async () => {
     await handleIncomingMessage(makePayload("Jejak Langkah page 200"));
-    expect(mockUpdateBook).toHaveBeenCalledWith("1", { current_page: 200 });
+    expect(mockUpdateBook).toHaveBeenCalledWith("1", expect.objectContaining({ current_page: 200, last_read: expect.any(String) }));
     expect(mockAppendReadingLog).toHaveBeenCalled();
     expect(mockSendMessage).toHaveBeenCalledWith("628129469200", "Jejak Langkah → page 200 ✓");
   });

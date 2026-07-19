@@ -27,7 +27,7 @@ export async function handleIncomingMessage(body: any): Promise<void> {
         if (!book) { await sendMessage(from, "Book not found. Check the title and try again."); return; }
         const prevPage = book.current_page;
         const newPage = intent.fields?.current_page ?? prevPage;
-        await updateBook(book.id, { current_page: newPage });
+        await updateBook(book.id, { current_page: newPage, last_read: new Date().toISOString() });
         await appendReadingLog({
           book_id: book.id,
           book_title: book.title,
