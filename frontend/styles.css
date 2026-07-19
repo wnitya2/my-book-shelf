@@ -1,0 +1,17 @@
+@import "tailwindcss";
+@source "./**/*.tsx";
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  font-family: "Lato", sans-serif;
+  background-color: #F4F1EA;
+  color: #181818;
+  margin: 0;
+}
+
+h1, h2, h3 {
+  font-family: "Merriweather", serif;
+}

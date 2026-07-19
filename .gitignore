@@ -14,6 +14,7 @@ dist/
 build/
 .next/
 out/
+frontend/dist.css
 
 # OS files
 .DS_Store
