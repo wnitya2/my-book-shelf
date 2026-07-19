@@ -8,8 +8,11 @@ const mockBook: Book = {
   current_page: 50,
   total_pages: 352,
   status: "reading",
-  created_at: "2024-01-01T00:00:00.000Z",
-  updated_at: "2024-01-01T00:00:00.000Z",
+  date_started: "2024-01-01T00:00:00.000Z",
+  date_last_read: null,
+  date_finished: null,
+  cover_url: "",
+  rating: null,
 };
 
 const mockGetAllBooks = mock(() => Promise.resolve([mockBook]));

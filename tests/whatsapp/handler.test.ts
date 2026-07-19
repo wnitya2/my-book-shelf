@@ -4,7 +4,7 @@ import type { Book } from "../../src/sheets/books";
 const mockBook: Book = {
   id: "1", title: "Jejak Langkah", author: "Pramoedya", cover_url: "",
   current_page: 100, total_pages: 400, status: "reading", rating: null,
-  created_at: "2024-01-01T00:00:00Z", updated_at: "2024-01-01T00:00:00Z",
+  date_started: "2024-01-01T00:00:00Z", date_last_read: null, date_finished: null,
 };
 
 const mockSendMessage = mock(() => Promise.resolve());
@@ -54,7 +54,7 @@ describe("handleIncomingMessage", () => {
 
   it("update_progress: updates book and appends reading log", async () => {
     await handleIncomingMessage(makePayload("Jejak Langkah page 200"));
-    expect(mockUpdateBook).toHaveBeenCalledWith("1", expect.objectContaining({ current_page: 200, last_read: expect.any(String) }));
+    expect(mockUpdateBook).toHaveBeenCalledWith("1", expect.objectContaining({ current_page: 200, date_last_read: expect.any(String) }));
     expect(mockAppendReadingLog).toHaveBeenCalled();
     expect(mockSendMessage).toHaveBeenCalledWith("628129469200", "Jejak Langkah → page 200 ✓");
   });

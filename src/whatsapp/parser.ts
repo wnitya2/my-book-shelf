@@ -21,7 +21,7 @@ export interface ParsedIntent {
     total_pages?: number;
     author?: string;
     cover_url?: string;
-    status?: "reading" | "finished" | "want_to_read";
+    status?: "reading" | "finished" | "want_to_read" | "on_hold";
     rating?: number;
     note?: string;
     note_page?: number;
@@ -33,7 +33,7 @@ Parse the user's message and return a JSON object with the intent.
 
 Supported actions:
 - update_progress: user updates reading page (e.g. "Jejak Langkah page 200")
-- update_status: user marks book as reading/finished/want_to_read
+- update_status: user marks book as reading/finished/want_to_read/on_hold
 - update_book: user updates book metadata (author, cover_url, total_pages)
 - set_rating: user rates a book 1-5
 - add_note: user saves a note/quote for a book
@@ -53,7 +53,7 @@ Return ONLY valid JSON matching this schema:
     "total_pages": <number or null>,
     "author": "<string or null>",
     "cover_url": "<string or null>",
-    "status": "<reading|finished|want_to_read or null>",
+    "status": "<reading|finished|want_to_read|on_hold or null>",
     "rating": <1-5 or null>,
     "note": "<string or null>",
     "note_page": <number or null>
@@ -66,7 +66,9 @@ Examples:
 - "Laskar Pelangi sudah selesai dibaca" → update_status, finished
 - "kasih bintang 4 untuk Bumi Manusia" → set_rating, rating 4
 - "tambah buku Pulang karya Tere Liye, 400 halaman" → add_book
-- "sampai mana aku baca Negeri 5 Menara?" → get_status`;
+- "sampai mana aku baca Negeri 5 Menara?" → get_status
+- "taruh on hold Jejak Langkah" → update_status, on_hold
+- "Jejak Langkah ditunda dulu" → update_status, on_hold`;
 
 export async function parseMessage(text: string, client?: Anthropic): Promise<ParsedIntent> {
   const c = client ?? new Anthropic();

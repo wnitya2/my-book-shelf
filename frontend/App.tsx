@@ -1,0 +1,80 @@
+import React, { useEffect, useState } from "react";
+import { createRoot } from "react-dom/client";
+import { BookSection } from "./components/BookSection";
+import { Sidebar } from "./components/Sidebar";
+
+type BookStatus = "reading" | "finished" | "want_to_read" | "on_hold";
+
+export interface Book {
+  id: string;
+  title: string;
+  author: string;
+  cover_url: string;
+  current_page: number;
+  total_pages: number;
+  status: BookStatus;
+  rating: number | null;
+  date_started: string;
+  date_last_read: string | null;
+  date_finished: string | null;
+}
+
+export default function App() {
+  const [books, setBooks] = useState<Book[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    fetch("/books")
+      .then((r) => r.json())
+      .then((data) => { setBooks(data); setLoading(false); })
+      .catch(() => { setError("Failed to load books."); setLoading(false); });
+  }, []);
+
+  return (
+    <div style={{ minHeight: "100vh", backgroundColor: "#F4F1EA", fontFamily: "'Lato', sans-serif" }}>
+      {/* Header */}
+      <header style={{ padding: "20px 32px", borderBottom: "1px solid #D8D4CC" }}>
+        <h1 style={{ fontFamily: "'Merriweather', serif", fontSize: "24px", fontWeight: 700, color: "#1A1A1A", margin: "0 0 6px" }}>
+          My Book Shelf
+        </h1>
+        <p style={{ fontFamily: "'Merriweather', serif", fontStyle: "italic", fontSize: "13px", color: "#999", margin: 0 }}>
+          "A library is a hospital for the mind."
+        </p>
+      </header>
+
+      {/* Body: sidebar + main */}
+      <div style={{ display: "flex", padding: "24px 32px", alignItems: "flex-start" }}>
+        {/* Sidebar */}
+        {!loading && !error && <Sidebar books={books} />}
+
+        {/* Main content */}
+        <main style={{ flex: 1, minWidth: 0 }}>
+          {loading && <p style={{ color: "#888", fontSize: "14px" }}>Loading your shelf…</p>}
+          {error && <p style={{ color: "#888", fontSize: "14px" }}>{error}</p>}
+
+          {!loading && !error && (
+            <div style={{ backgroundColor: "#FFFFFF", border: "1px solid #D8D8D8", borderRadius: "4px", padding: "20px 24px" }}>
+              <BookSection status="reading"      books={books.filter((b) => b.status === "reading")}      isFirst />
+              <BookSection status="on_hold"      books={books.filter((b) => b.status === "on_hold")} />
+              <BookSection status="finished"     books={books.filter((b) => b.status === "finished")} />
+              <BookSection status="want_to_read" books={books.filter((b) => b.status === "want_to_read")} />
+            </div>
+          )}
+        </main>
+      </div>
+      {/* Footer */}
+      <footer style={{ padding: "24px 32px", borderTop: "1px solid #D8D4CC", textAlign: "center" }}>
+        <p style={{ margin: 0, fontSize: "12px", color: "#AAAAAA", fontFamily: "'Lato', sans-serif" }}>
+          © 2026 Nitya Wijayanti &nbsp;·&nbsp; made with <span style={{ color: "#E53935" }}>♥</span> & a slightly awkward robot 🤖
+        </p>
+        <p style={{ margin: "4px 0 0", fontSize: "11px", color: "#C8C4BC", fontFamily: "'Merriweather', serif", fontStyle: "italic" }}>
+          vibe-coded with Claude, in stolen moments between playtime chaos with my daughters 🧸
+        </p>
+      </footer>
+    </div>
+  );
+}
+
+const root = createRoot(document.getElementById("root")!);
+root.render(<App />);

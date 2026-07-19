@@ -27,7 +27,9 @@ export async function handleIncomingMessage(body: any): Promise<void> {
         if (!book) { await sendMessage(from, "Book not found. Check the title and try again."); return; }
         const prevPage = book.current_page;
         const newPage = intent.fields?.current_page ?? prevPage;
-        await updateBook(book.id, { current_page: newPage, last_read: new Date().toISOString() });
+        const progressUpdates: Record<string, unknown> = { current_page: newPage, date_last_read: new Date().toISOString() };
+        if (book.status === "want_to_read") progressUpdates.status = "reading";
+        await updateBook(book.id, progressUpdates as Parameters<typeof updateBook>[1]);
         await appendReadingLog({
           book_id: book.id,
           book_title: book.title,
@@ -42,7 +44,9 @@ export async function handleIncomingMessage(body: any): Promise<void> {
         const book = matchBook(intent.book_title ?? "", books);
         if (!book) { await sendMessage(from, "Book not found. Check the title and try again."); return; }
         const status = intent.fields?.status ?? "reading";
-        await updateBook(book.id, { status });
+        const statusUpdates: Record<string, unknown> = { status };
+        if (status === "finished") statusUpdates.date_finished = new Date().toISOString();
+        await updateBook(book.id, statusUpdates as Parameters<typeof updateBook>[1]);
         await sendMessage(from, `${book.title} marked as ${status} ✓`);
         break;
       }
@@ -108,10 +112,12 @@ export async function handleIncomingMessage(body: any): Promise<void> {
 
       case "list_books": {
         const reading = books.filter((b) => b.status === "reading");
+        const onHold = books.filter((b) => b.status === "on_hold");
         const finished = books.filter((b) => b.status === "finished");
         const wantToRead = books.filter((b) => b.status === "want_to_read");
         const lines = [
           reading.length ? `📖 Reading:\n${reading.map((b) => `- ${b.title}`).join("\n")}` : null,
+          onHold.length ? `⏸ On hold:\n${onHold.map((b) => `- ${b.title}`).join("\n")}` : null,
           finished.length ? `✅ Finished:\n${finished.map((b) => `- ${b.title}`).join("\n")}` : null,
           wantToRead.length ? `📚 Want to read:\n${wantToRead.map((b) => `- ${b.title}`).join("\n")}` : null,
         ].filter(Boolean);
