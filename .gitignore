@@ -34,3 +34,6 @@ token.json
 
 # Planning
 planning/
+
+# issue
+issue*.md
