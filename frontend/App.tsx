@@ -3,7 +3,7 @@ import { createRoot } from "react-dom/client";
 import { BookSection } from "./components/BookSection";
 import { Sidebar } from "./components/Sidebar";
 
-type BookStatus = "reading" | "finished" | "want_to_read" | "on_hold";
+type BookStatus = "reading" | "finished" | "want_to_read" | "on_hold" | "dropped";
 
 export interface Book {
   id: string;
@@ -53,14 +53,22 @@ export default function App() {
           {loading && <p style={{ color: "#888", fontSize: "14px" }}>Loading your shelf…</p>}
           {error && <p style={{ color: "#888", fontSize: "14px" }}>{error}</p>}
 
-          {!loading && !error && (
-            <div style={{ backgroundColor: "#FFFFFF", border: "1px solid #D8D8D8", borderRadius: "4px", padding: "20px 24px" }}>
-              <BookSection status="reading"      books={books.filter((b) => b.status === "reading")}      isFirst />
-              <BookSection status="on_hold"      books={books.filter((b) => b.status === "on_hold")} />
-              <BookSection status="finished"     books={books.filter((b) => b.status === "finished")} />
-              <BookSection status="want_to_read" books={books.filter((b) => b.status === "want_to_read")} />
-            </div>
-          )}
+          {!loading && !error && (() => {
+            const byLastRead = (a: Book, b: Book) =>
+              (b.date_last_read ?? "").localeCompare(a.date_last_read ?? "");
+            const byFinished = (a: Book, b: Book) =>
+              (b.date_finished ?? "").localeCompare(a.date_finished ?? "");
+
+            return (
+              <div style={{ backgroundColor: "#FFFFFF", border: "1px solid #D8D8D8", borderRadius: "4px", padding: "20px 24px" }}>
+                <BookSection status="reading"      books={books.filter((b) => b.status === "reading").sort(byLastRead)}      isFirst />
+                <BookSection status="on_hold"      books={books.filter((b) => b.status === "on_hold").sort(byLastRead)} />
+                <BookSection status="finished"     books={books.filter((b) => b.status === "finished").sort(byFinished)} />
+                <BookSection status="dropped"      books={books.filter((b) => b.status === "dropped").sort(byLastRead)} />
+                <BookSection status="want_to_read" books={books.filter((b) => b.status === "want_to_read").sort(byLastRead)} />
+              </div>
+            );
+          })()}
         </main>
       </div>
       {/* Footer */}

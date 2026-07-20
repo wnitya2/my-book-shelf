@@ -113,11 +113,13 @@ export async function handleIncomingMessage(body: any): Promise<void> {
       case "list_books": {
         const reading = books.filter((b) => b.status === "reading");
         const onHold = books.filter((b) => b.status === "on_hold");
+        const dropped = books.filter((b) => b.status === "dropped");
         const finished = books.filter((b) => b.status === "finished");
         const wantToRead = books.filter((b) => b.status === "want_to_read");
         const lines = [
           reading.length ? `📖 Reading:\n${reading.map((b) => `- ${b.title}`).join("\n")}` : null,
           onHold.length ? `⏸ On hold:\n${onHold.map((b) => `- ${b.title}`).join("\n")}` : null,
+          dropped.length ? `🚫 Dropped:\n${dropped.map((b) => `- ${b.title}`).join("\n")}` : null,
           finished.length ? `✅ Finished:\n${finished.map((b) => `- ${b.title}`).join("\n")}` : null,
           wantToRead.length ? `📚 Want to read:\n${wantToRead.map((b) => `- ${b.title}`).join("\n")}` : null,
         ].filter(Boolean);
