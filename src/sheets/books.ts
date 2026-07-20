@@ -1,6 +1,6 @@
 import { sheets, SPREADSHEET_ID, SHEET_NAME } from "./client";
 
-export type BookStatus = "reading" | "finished" | "want_to_read" | "on_hold";
+export type BookStatus = "reading" | "finished" | "want_to_read" | "on_hold" | "dropped";
 
 export interface Book {
   id: string;

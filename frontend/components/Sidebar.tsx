@@ -1,13 +1,13 @@
 import React from "react";
 
-type BookStatus = "reading" | "finished" | "want_to_read" | "on_hold";
+type BookStatus = "reading" | "finished" | "want_to_read" | "on_hold" | "dropped";
 interface Book { status: BookStatus; current_page: number; rating: number | null; }
 
 const STATUS_LABELS: Record<BookStatus, string> = {
-  reading: "Reading", finished: "Finished", want_to_read: "Want to Read", on_hold: "On Hold",
+  reading: "Reading", finished: "Finished", want_to_read: "Want to Read", on_hold: "On Hold", dropped: "Dropped",
 };
 const STATUS_COLORS: Record<BookStatus, string> = {
-  reading: "#C96442", finished: "#3D2B1F", want_to_read: "#D4A03A", on_hold: "#9BA5B0",
+  reading: "#C96442", finished: "#3D2B1F", want_to_read: "#D4A03A", on_hold: "#9BA5B0", dropped: "#C0776A",
 };
 
 export function Sidebar({ books }: { books: Book[] }) {
@@ -17,15 +17,18 @@ export function Sidebar({ books }: { books: Book[] }) {
   const finished = books.filter((b) => b.status === "finished").length;
   const wantToRead = books.filter((b) => b.status === "want_to_read").length;
   const totalPages = books.reduce((s, b) => s + (b.current_page ?? 0), 0);
-  const ratings = books.filter((b) => b.rating != null).map((b) => b.rating as number);
+  const ratings = books.filter((b) => b.status === "finished" && b.rating != null).map((b) => b.rating as number);
   const avgRating = ratings.length > 0
     ? (ratings.reduce((a, v) => a + v, 0) / ratings.length).toFixed(1) : null;
 
+  const dropped = books.filter((b) => b.status === "dropped").length;
+
   const statusRows = [
+    { key: "finished" as BookStatus, count: finished },
     { key: "reading" as BookStatus, count: reading },
     { key: "on_hold" as BookStatus, count: onHold },
-    { key: "finished" as BookStatus, count: finished },
     { key: "want_to_read" as BookStatus, count: wantToRead },
+    { key: "dropped" as BookStatus, count: dropped },
   ].filter((r) => r.count > 0);
 
   const card: React.CSSProperties = {

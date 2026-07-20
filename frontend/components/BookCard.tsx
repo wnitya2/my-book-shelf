@@ -1,6 +1,6 @@
 import React from "react";
 
-type BookStatus = "reading" | "finished" | "want_to_read" | "on_hold";
+type BookStatus = "reading" | "finished" | "want_to_read" | "on_hold" | "dropped";
 
 interface Book {
   id: string;
@@ -19,6 +19,27 @@ const COVER_COLORS = [
   "#7BC4B2", "#6B5CA5", "#89A7CC", "#C96442", "#D4A03A",
   "#2D3A5C", "#A0614B", "#B5708A", "#4A4A4A", "#5B8A5B",
 ];
+
+function StarRating({ rating }: { rating: number }) {
+  return (
+    <span style={{ display: "inline-flex", gap: "1px" }}>
+      {[1, 2, 3, 4, 5].map((i) => {
+        if (rating >= i) {
+          return <span key={i} style={{ color: "#D4A03A", fontSize: "13px" }}>★</span>;
+        } else if (rating >= i - 0.5) {
+          return (
+            <span key={i} style={{ position: "relative", display: "inline-block", fontSize: "13px" }}>
+              <span style={{ color: "#DDDDDD" }}>★</span>
+              <span style={{ position: "absolute", left: 0, top: 0, width: "50%", overflow: "hidden", color: "#D4A03A" }}>★</span>
+            </span>
+          );
+        } else {
+          return <span key={i} style={{ color: "#DDDDDD", fontSize: "13px" }}>★</span>;
+        }
+      })}
+    </span>
+  );
+}
 
 function coverColor(title: string): string {
   let h = 0;
@@ -54,11 +75,11 @@ export function BookCard({ book }: { book: Book }) {
         </p>
         <p style={{ margin: "2px 0 0", fontSize: "12px", color: "#767676" }}>by {book.author}</p>
 
-        {/* Progress bar + stats for reading / on_hold */}
-        {(book.status === "reading" || book.status === "on_hold") && book.total_pages > 0 && (
+        {/* Progress bar + stats for reading / on_hold / dropped */}
+        {(book.status === "reading" || book.status === "on_hold" || book.status === "dropped") && book.total_pages > 0 && (
           <>
             <div style={{ marginTop: "8px", height: "4px", backgroundColor: "#EBEBEB", borderRadius: "2px", maxWidth: "220px" }}>
-              <div style={{ height: "100%", width: `${pct}%`, backgroundColor: book.status === "on_hold" ? "#9BA5B0" : "#409080", borderRadius: "2px" }} />
+              <div style={{ height: "100%", width: `${pct}%`, backgroundColor: book.status === "reading" ? "#409080" : book.status === "on_hold" ? "#9BA5B0" : "#C0776A", borderRadius: "2px" }} />
             </div>
             <p style={{ margin: "4px 0 0", fontSize: "12px", color: "#767676" }}>
               {pct}% — p. {book.current_page} of {book.total_pages}
@@ -74,9 +95,7 @@ export function BookCard({ book }: { book: Book }) {
         {/* Rating + date for finished */}
         {book.status === "finished" && (
           <div style={{ marginTop: "4px", display: "flex", gap: "8px", alignItems: "center", flexWrap: "wrap" }}>
-            {book.rating && (
-              <span style={{ fontSize: "12px", color: "#D4A03A" }}>{"★".repeat(book.rating)}{"☆".repeat(5 - book.rating)}</span>
-            )}
+            {book.rating && <StarRating rating={book.rating} />}
             {book.date_finished && (
               <span style={{ fontSize: "12px", color: "#767676" }}>
                 Finished {new Date(book.date_finished).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}

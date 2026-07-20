@@ -17,7 +17,7 @@ export const booksRoute = new Elysia({ prefix: "/books" })
         author: t.String(),
         current_page: t.Number({ default: 0 }),
         total_pages: t.Number(),
-        status: t.Union([t.Literal("reading"), t.Literal("finished"), t.Literal("want_to_read"), t.Literal("on_hold")]),
+        status: t.Union([t.Literal("reading"), t.Literal("finished"), t.Literal("want_to_read"), t.Literal("on_hold"), t.Literal("dropped")]),
       }),
     }
   )
@@ -34,7 +34,7 @@ export const booksRoute = new Elysia({ prefix: "/books" })
         author: t.Optional(t.String()),
         current_page: t.Optional(t.Number()),
         total_pages: t.Optional(t.Number()),
-        status: t.Optional(t.Union([t.Literal("reading"), t.Literal("finished"), t.Literal("want_to_read"), t.Literal("on_hold")])),
+        status: t.Optional(t.Union([t.Literal("reading"), t.Literal("finished"), t.Literal("want_to_read"), t.Literal("on_hold"), t.Literal("dropped")])),
         cover_url: t.Optional(t.String()),
         rating: t.Optional(t.Number()),
         date_finished: t.Optional(t.String()),
