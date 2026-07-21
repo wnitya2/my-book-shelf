@@ -21,8 +21,8 @@ RUN apt-get update -qq && \
     apt-get install --no-install-recommends -y build-essential pkg-config python-is-python3
 
 # Install node modules
-COPY bun.lock package-lock.json package.json ./
-RUN bun install --ci
+COPY bun.lock package.json ./
+RUN bun install --frozen-lockfile
 
 # Copy application code
 COPY . .
