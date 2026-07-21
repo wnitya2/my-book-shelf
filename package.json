@@ -6,7 +6,7 @@
     "dev:server": "bun run --watch src/index.ts",
     "dev:css": "bunx @tailwindcss/cli -i ./frontend/styles.css -o ./frontend/dist.css --watch",
     "build:css": "bunx @tailwindcss/cli -i ./frontend/styles.css -o ./frontend/dist.css --minify",
-    "build": "bun run build:css && NODE_ENV=production bun build ./frontend/index.html --outdir ./dist --minify",
+    "build": "bun run build:css && bun build ./frontend/index.html --outdir ./dist --production",
     "start": "bun run src/index.ts",
     "test": "bun test"
   },
