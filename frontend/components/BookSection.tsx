@@ -53,10 +53,10 @@ const btnStyle = (disabled: boolean): React.CSSProperties => ({
   fontFamily: "'Lato', sans-serif",
 });
 
-export function BookSection({ status, books, isFirst = false }: { status: BookStatus; books: Book[]; isFirst?: boolean }) {
+export function BookSection({ status, books, isFirst = false, isMobile = false }: { status: BookStatus; books: Book[]; isFirst?: boolean; isMobile?: boolean }) {
   const [page, setPage] = useState(0);
   const label = SECTION_LABELS[status];
-  const twoColumn = status === "reading" || status === "finished" || status === "on_hold" || status === "dropped";
+  const twoColumn = !isMobile && (status === "reading" || status === "finished" || status === "on_hold" || status === "dropped");
   const totalPages = Math.ceil(books.length / PAGE_SIZE);
   const paged = books.slice(page * PAGE_SIZE, page * PAGE_SIZE + PAGE_SIZE);
 
@@ -96,7 +96,7 @@ export function BookSection({ status, books, isFirst = false }: { status: BookSt
             const lastRowStart = 2 * Math.floor((paged.length - 1) / 2);
             return (
               <div key={book.id} style={{ borderBottom: i >= lastRowStart ? "none" : "1px solid #EBEBEB" }}>
-                <BookCard book={book} />
+                <BookCard book={book} isMobile={isMobile} />
               </div>
             );
           })}
@@ -108,7 +108,7 @@ export function BookSection({ status, books, isFirst = false }: { status: BookSt
         <div>
           {paged.map((book, i) => (
             <div key={book.id} style={{ borderBottom: i < paged.length - 1 ? "1px solid #EBEBEB" : "none" }}>
-              <BookCard book={book} />
+              <BookCard book={book} isMobile={isMobile} />
             </div>
           ))}
         </div>
