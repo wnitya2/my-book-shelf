@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 
 type BookStatus = "reading" | "finished" | "want_to_read" | "on_hold" | "dropped";
 interface Book { status: BookStatus; current_page: number; rating: number | null; }
@@ -10,7 +10,8 @@ const STATUS_COLORS: Record<BookStatus, string> = {
   reading: "#C96442", finished: "#3D2B1F", want_to_read: "#D4A03A", on_hold: "#9BA5B0", dropped: "#C0776A",
 };
 
-export function Sidebar({ books }: { books: Book[] }) {
+export function Sidebar({ books, isMobile = false }: { books: Book[]; isMobile?: boolean }) {
+  const [expanded, setExpanded] = useState(false);
   const total = books.length;
   const reading = books.filter((b) => b.status === "reading").length;
   const onHold = books.filter((b) => b.status === "on_hold").length;
@@ -40,8 +41,37 @@ export function Sidebar({ books }: { books: Book[] }) {
     textTransform: "uppercase", letterSpacing: "0.08em", marginBottom: "12px",
   };
 
+  const showCards = !isMobile || expanded;
+
   return (
-    <aside style={{ width: "200px", flexShrink: 0, marginRight: "24px" }}>
+    <aside style={{
+      width: isMobile ? "100%" : "200px",
+      flexShrink: 0,
+      marginRight: isMobile ? 0 : "24px",
+      marginBottom: isMobile ? "8px" : 0,
+    }}>
+      {isMobile && (
+        <button
+          onClick={() => setExpanded((v) => !v)}
+          style={{
+            ...card,
+            width: "100%",
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center",
+            cursor: "pointer",
+            textAlign: "left",
+            fontFamily: "'Lato', sans-serif",
+            marginBottom: expanded ? "12px" : 0,
+          }}
+        >
+          <span style={{ ...label, marginBottom: 0 }}>My Library ({total})</span>
+          <span style={{ fontSize: "12px", color: "#767676" }}>{expanded ? "▾" : "▸"}</span>
+        </button>
+      )}
+
+      {showCards && (
+      <>
       <div style={card}>
         <p style={label}>My Library</p>
         {[
@@ -73,6 +103,8 @@ export function Sidebar({ books }: { books: Book[] }) {
             ))}
           </div>
         </div>
+      )}
+      </>
       )}
     </aside>
   );

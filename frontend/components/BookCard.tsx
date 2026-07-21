@@ -47,11 +47,15 @@ function coverColor(title: string): string {
   return COVER_COLORS[Math.abs(h) % COVER_COLORS.length];
 }
 
-export function BookCard({ book }: { book: Book }) {
+export function BookCard({ book, isMobile = false }: { book: Book; isMobile?: boolean }) {
   const pct = book.total_pages > 0
     ? Math.min(100, Math.round((book.current_page / book.total_pages) * 100))
     : 0;
   const bg = coverColor(book.title);
+
+  const titleStyle: React.CSSProperties = isMobile
+    ? { margin: 0, fontSize: "14px", fontWeight: 700, color: "#1A1A1A", lineHeight: "1.3", display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical", overflow: "hidden" }
+    : { margin: 0, fontSize: "14px", fontWeight: 700, color: "#1A1A1A", lineHeight: "1.3", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" };
 
   return (
     <div style={{ display: "flex", gap: "12px", alignItems: "flex-start", padding: "10px 0" }}>
@@ -70,7 +74,7 @@ export function BookCard({ book }: { book: Book }) {
 
       {/* Book info */}
       <div style={{ flex: 1, minWidth: 0 }}>
-        <p style={{ margin: 0, fontSize: "14px", fontWeight: 700, color: "#1A1A1A", lineHeight: "1.3", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }} title={book.title}>
+        <p style={titleStyle} title={book.title}>
           {book.title}
         </p>
         <p style={{ margin: "2px 0 0", fontSize: "12px", color: "#767676" }}>by {book.author}</p>
