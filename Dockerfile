@@ -27,6 +27,9 @@ RUN bun install --frozen-lockfile
 # Copy application code
 COPY . .
 
+# Build the static frontend bundle into ./dist
+RUN bun run build
+
 
 # Final stage for app image
 FROM base
