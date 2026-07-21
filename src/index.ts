@@ -9,7 +9,10 @@ const app = new Elysia()
   .use(booksRoute)
   .use(webhookRoute);
 
+const isDev = process.env.NODE_ENV !== "production";
+
 Bun.serve({
+  hostname: "0.0.0.0",
   routes: {
     "/": index,
   },
@@ -17,10 +20,12 @@ Bun.serve({
     return app.handle(req);
   },
   port: 3000,
-  development: {
-    hmr: true,
-    console: true,
-  },
+  ...(isDev && {
+    development: {
+      hmr: true,
+      console: true,
+    },
+  }),
 });
 
-console.log("Server running at http://localhost:3000");
+console.log("Server running on http://0.0.0.0:3000");
